@@ -35,13 +35,14 @@ class Foreman::CLI < Thor
 
   desc "export FORMAT LOCATION", "Export the application to another process management format"
 
-  method_option :app,         :type => :string,  :aliases => "-a"
-  method_option :log,         :type => :string,  :aliases => "-l"
-  method_option :env,         :type => :string,  :aliases => "-e", :desc => "Specify an environment file to load, defaults to .env"
-  method_option :port,        :type => :numeric, :aliases => "-p"
-  method_option :user,        :type => :string,  :aliases => "-u"
-  method_option :template,    :type => :string,  :aliases => "-t"
-  method_option :concurrency, :type => :string,  :aliases => "-c", :banner => '"alpha=5,bar=3"'
+  method_option :app,          :type => :string,  :aliases => "-a"
+  method_option :log,          :type => :string,  :aliases => "-l"
+  method_option :env,          :type => :string,  :aliases => "-e", :desc => "Specify an environment file to load, defaults to .env"
+  method_option :options_file, :type => :string,  :aliases => "-o", :desc => "Specify an options file to load, defaults to .foreman"
+  method_option :port,         :type => :numeric, :aliases => "-p"
+  method_option :user,         :type => :string,  :aliases => "-u"
+  method_option :template,     :type => :string,  :aliases => "-t"
+  method_option :concurrency,  :type => :string,  :aliases => "-c", :banner => '"alpha=5,bar=3"'
 
   def export(format, location=nil)
     check_procfile!
@@ -97,8 +98,11 @@ private ######################################################################
 
   def options
     original_options = super
-    return original_options unless File.exists?(".foreman")
-    defaults = YAML::load_file(".foreman") || {}
+
+    options_file = original_options[:options_file] || ".foreman"
+
+    return original_options unless File.exists?(options_file)
+    defaults = YAML::load_file(options_file) || {}
     Thor::CoreExt::HashWithIndifferentAccess.new(defaults.merge(original_options))
   end
 end

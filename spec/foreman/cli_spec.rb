@@ -56,6 +56,15 @@ describe "Foreman::CLI", :fakefs do
         foreman %{ export upstart /upstart }
       end
 
+      it "respects --options-file" do
+        write_procfile
+        File.open("options.yml", "w") { |f| f.puts "concurrency: alpha=2" }
+        mock_export = mock(Foreman::Export::Upstart)
+        mock(Foreman::Export::Upstart).new("/upstart", is_a(Foreman::Engine), { "concurrency" => "alpha=2", "options_file" => "options.yml" }) { mock_export }
+        mock_export.export
+        foreman %{ export upstart /upstart --options-file options.yml }
+      end
+
       it "respects --env" do
         write_procfile
         write_env("envfile")
